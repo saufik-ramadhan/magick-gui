@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MagickGUI — ImageMagick 7 Desktop App</title>
+  <meta name="description" content="A clean desktop GUI for ImageMagick 7. Convert, crop, watermark, and remove backgrounds — all with drag-and-drop batch processing." />
+  <meta property="og:title" content="MagickGUI — ImageMagick 7 Desktop App" />
+  <meta property="og:description" content="Convert, crop, watermark, and remove backgrounds. No command line required." />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- ── Nav ───────────────────────────────────────────────────────────────── -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <span class="nav-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6m0-6-6 6"/></svg>
+        MagickGUI
+      </span>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#models">AI Models</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/YOUR_GITHUB_USERNAME/magick-gui" target="_blank" rel="noopener" class="nav-github">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="badge">Windows · Free · Open Source</div>
+      <h1 class="hero-title">
+        ImageMagick 7,<br />
+        <span class="accent">without the command line.</span>
+      </h1>
+      <p class="hero-sub">
+        MagickGUI wraps ImageMagick 7 in a clean desktop UI. Batch convert, crop,
+        watermark, and remove backgrounds with drag-and-drop simplicity.
+      </p>
+      <div class="hero-actions">
+        <a href="https://github.com/YOUR_GITHUB_USERNAME/magick-gui/releases/latest" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download for Windows
+        </a>
+        <a href="https://github.com/YOUR_GITHUB_USERNAME/magick-gui" class="btn btn-secondary" target="_blank" rel="noopener">
+          View on GitHub
+        </a>
+      </div>
+      <p class="hero-note">v1.0.0 · ~268 MB · Windows 10/11 x64 · No dependencies</p>
+
+      <!-- App UI preview mockup -->
+      <div class="mockup">
+        <div class="mockup-bar">
+          <span class="mockup-dot dot-red"></span>
+          <span class="mockup-dot dot-yellow"></span>
+          <span class="mockup-dot dot-green"></span>
+          <span class="mockup-title">MagickGUI</span>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-sidebar">
+            <div class="mockup-nav-item active">Convert</div>
+            <div class="mockup-nav-item">Crop</div>
+            <div class="mockup-nav-item">Watermark</div>
+            <div class="mockup-nav-item">BG Remove</div>
+          </div>
+          <div class="mockup-content">
+            <div class="mockup-dropzone">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Drop images here</span>
+            </div>
+            <div class="mockup-fields">
+              <div class="mockup-field">
+                <span class="mockup-label">Output format</span>
+                <span class="mockup-value">WebP</span>
+              </div>
+              <div class="mockup-field">
+                <span class="mockup-label">Quality</span>
+                <span class="mockup-value">90%</span>
+              </div>
+              <div class="mockup-field">
+                <span class="mockup-label">Resize</span>
+                <span class="mockup-value">100%</span>
+              </div>
+            </div>
+            <div class="mockup-jobs">
+              <div class="mockup-job done">photo_001.jpg <span class="mockup-job-tag success">Done</span></div>
+              <div class="mockup-job done">photo_002.jpg <span class="mockup-job-tag success">Done</span></div>
+              <div class="mockup-job">photo_003.jpg <span class="mockup-job-tag running">Converting…</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Features ──────────────────────────────────────────────────────────── -->
+  <section class="section" id="features">
+    <div class="container">
+      <h2 class="section-title">Everything you need to process images</h2>
+      <p class="section-sub">Four powerful tools in one app, all with batch processing and live progress.</p>
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <h3>Convert</h3>
+          <p>Batch convert to JPEG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO, and PDF. Set quality and resize percentage per run.</p>
+          <ul class="feature-list">
+            <li>9 output formats</li>
+            <li>Quality control for lossy formats</li>
+            <li>Resize by percentage</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v4M2 6h4M18 2v4M18 2v4M22 6h-4M6 22v-4M2 18h4M22 18h-4M18 22v-4"/><rect x="6" y="6" width="12" height="12"/></svg>
+          </div>
+          <h3>Crop</h3>
+          <p>Crop images to exact aspect ratios with a visual gravity picker. Handles portrait and landscape orientations automatically.</p>
+          <ul class="feature-list">
+            <li>8 preset ratios (1:1, 16:9, 4:3 …)</li>
+            <li>9-position crop gravity</li>
+            <li>Visual ratio preview</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+          </div>
+          <h3>Watermark</h3>
+          <p>Overlay text or image watermarks anywhere on a photo. Control font, size, colour, opacity, and position independently.</p>
+          <ul class="feature-list">
+            <li>Text or image overlay</li>
+            <li>9-position gravity grid</li>
+            <li>Opacity &amp; offset control</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+          </div>
+          <h3>Background Removal</h3>
+          <p>Remove backgrounds by colour (flood-fill) or with AI models. The AI engine is fully bundled — no Python install needed.</p>
+          <ul class="feature-list">
+            <li>Colour / flood-fill method</li>
+            <li>AI removal (rembg, bundled)</li>
+            <li>9 model choices</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── AI Models ─────────────────────────────────────────────────────────── -->
+  <section class="section section-dark" id="models">
+    <div class="container">
+      <h2 class="section-title">AI Background Removal Models</h2>
+      <p class="section-sub">rembg is bundled directly in the installer. Models are downloaded on first use and cached locally.</p>
+
+      <div class="models-grid">
+        <div class="model-group">
+          <div class="model-group-header">
+            <span class="model-group-badge mit">MIT License</span>
+            BiRefNet
+          </div>
+          <div class="model-rows">
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">birefnet-general</span>
+                <span class="model-tag tag-recommended">Recommended</span>
+              </div>
+              <span class="model-size">~350 MB</span>
+              <span class="model-desc">Best quality for most subjects</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">birefnet-general-lite</span>
+                <span class="model-tag tag-fast">Fast</span>
+              </div>
+              <span class="model-size">~100 MB</span>
+              <span class="model-desc">Smaller &amp; faster, good quality/speed trade-off</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">birefnet-portrait</span>
+                <span class="model-tag">Portraits</span>
+              </div>
+              <span class="model-size">~350 MB</span>
+              <span class="model-desc">Fine-tuned for human portraits and selfies</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">birefnet-dis</span>
+                <span class="model-tag">Products</span>
+              </div>
+              <span class="model-size">~350 MB</span>
+              <span class="model-desc">Dichotomous segmentation for product shots</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">birefnet-hrsod</span>
+                <span class="model-tag">Hi-Res</span>
+              </div>
+              <span class="model-size">~350 MB</span>
+              <span class="model-desc">High-resolution salient object detection</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="model-group">
+          <div class="model-group-header">
+            <span class="model-group-badge legacy">Legacy</span>
+            U2Net
+          </div>
+          <div class="model-rows">
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">u2net</span>
+                <span class="model-tag">Classic</span>
+              </div>
+              <span class="model-size">~170 MB</span>
+              <span class="model-desc">Classic general-purpose model, solid all-around</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">u2net_human_seg</span>
+                <span class="model-tag">Portraits</span>
+              </div>
+              <span class="model-size">~170 MB</span>
+              <span class="model-desc">U2Net optimised for people</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">isnet-general-use</span>
+                <span class="model-tag">High detail</span>
+              </div>
+              <span class="model-size">~170 MB</span>
+              <span class="model-desc">ISNet with high edge detail</span>
+            </div>
+            <div class="model-row">
+              <div class="model-info">
+                <span class="model-name">silueta</span>
+                <span class="model-tag tag-fast">Fast</span>
+              </div>
+              <span class="model-size">~45 MB</span>
+              <span class="model-desc">Lightweight, good for simple objects</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="models-note">
+        Models are cached in <code>%USERPROFILE%\.u2net</code> after first use.
+        BiRefNet models use the MIT license and are safe for commercial projects.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Install ───────────────────────────────────────────────────────────── -->
+  <section class="section" id="install">
+    <div class="container">
+      <h2 class="section-title">Get started in seconds</h2>
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Download the installer</h3>
+            <p>Grab <strong>MagickGUI Setup 1.0.0.exe</strong> from the releases page. ImageMagick 7 and rembg are bundled — no separate installs needed.</p>
+            <a href="https://github.com/YOUR_GITHUB_USERNAME/magick-gui/releases/latest" class="btn btn-primary btn-sm">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download v1.0.0
+            </a>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Run the installer</h3>
+            <p>Double-click the .exe and follow the NSIS installer. Choose your install directory. Creates a desktop shortcut and Start Menu entry.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Drop images and go</h3>
+            <p>Open MagickGUI, pick a tool, drag your images in, set your options, and click <strong>Start</strong>. AI models download automatically on first use.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="requirements">
+        <h3>System Requirements</h3>
+        <div class="req-grid">
+          <div class="req-item">
+            <span class="req-label">OS</span>
+            <span>Windows 10 / 11 (x64)</span>
+          </div>
+          <div class="req-item">
+            <span class="req-label">Disk</span>
+            <span>~400 MB for app + space for AI models (45–350 MB each)</span>
+          </div>
+          <div class="req-item">
+            <span class="req-label">RAM</span>
+            <span>4 GB minimum, 8 GB recommended for AI models</span>
+          </div>
+          <div class="req-item">
+            <span class="req-label">Internet</span>
+            <span>Required only for first-use AI model download</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Build from source ─────────────────────────────────────────────────── -->
+  <section class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">Build from source</h2>
+      <p class="section-sub">Requires Node.js 18+, npm 9+, and Python 3.10–3.12 on Windows.</p>
+      <div class="code-steps">
+        <div class="code-block">
+          <span class="code-comment"># Clone and install dependencies</span>
+          <code>git clone https://github.com/YOUR_GITHUB_USERNAME/magick-gui.git
+cd magick-gui
+npm install</code>
+        </div>
+        <div class="code-block">
+          <span class="code-comment"># Download ImageMagick + build rembg.exe (run once)</span>
+          <code>npm run prepare-resources</code>
+        </div>
+        <div class="code-block">
+          <span class="code-comment"># Build the NSIS installer</span>
+          <code>npm run package</code>
+        </div>
+        <div class="code-block">
+          <span class="code-comment"># Or run in dev mode (needs magick + rembg on PATH)</span>
+          <code>npm run dev</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ────────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span class="nav-logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6m0-6-6 6"/></svg>
+        MagickGUI
+      </span>
+      <span class="footer-copy">MIT License · Built with Electron, React &amp; ImageMagick 7</span>
+      <a href="https://github.com/YOUR_GITHUB_USERNAME/magick-gui" target="_blank" rel="noopener" class="footer-gh">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      </a>
+    </div>
+  </footer>
+
+</body>
+</html>
