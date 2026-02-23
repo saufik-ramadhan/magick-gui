@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background-color: #1a1a2e;
+    color: #e8e8f0;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* File drag highlight */
+  .drop-active {
+    @apply border-accent ring-2 ring-accent/30;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0f3460;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #e94560;
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-accent hover:bg-accent-hover text-white font-semibold rounded-lg
+           transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-surface-3 hover:bg-opacity-80 text-white font-medium rounded-lg
+           border border-white/10 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .input-base {
+    @apply w-full bg-surface-3 border border-white/10 rounded-lg px-3 py-2 text-sm
+           text-white focus:outline-none focus:border-accent/60 transition-colors;
+  }
+
+  .label-base {
+    @apply text-xs font-medium text-white/50 uppercase tracking-widest mb-1 block;
+  }
+
+  .card {
+    @apply bg-surface-2 rounded-xl border border-white/5 p-5;
+  }
+}

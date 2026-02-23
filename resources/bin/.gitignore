@@ -1,0 +1,8 @@
+# Ignore all generated binary resources — built by scripts/prepare-resources.ps1
+# Keep the .gitkeep placeholder so git tracks the empty folders
+
+magick/*
+!magick/.gitkeep
+
+rembg/*
+!rembg/.gitkeep
