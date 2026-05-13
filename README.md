@@ -4,28 +4,29 @@ A desktop GUI for [ImageMagick 7](https://imagemagick.org) built with Electron, 
 
 ## Features
 
-| Panel | What it does |
-|---|---|
-| **Convert** | Convert between JPEG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO, PDF. Set quality and resize percentage. |
-| **Crop** | Crop to a preset aspect ratio (1:1, 4:3, 16:9, 3:2, 9:16, 21:9 …) with gravity control. |
-| **Watermark** | Overlay a text or image watermark. Control position, opacity, font, size, and colour. |
-| **BG Remove** | Remove backgrounds via colour/flood-fill (ImageMagick) or AI (rembg). |
+| Panel         | What it does                                                                                                                                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Convert**   | Convert between JPEG, PNG, WebP, AVIF, GIF, BMP, TIFF, ICO, PDF. Set quality and resize percentage.                                                             |
+| **Crop**      | Crop to a preset aspect ratio (1:1, 4:3, 16:9, 3:2, 9:16, 21:9 …) with gravity control.                                                                         |
+| **Watermark** | Overlay a text or image watermark. Control position, opacity, font, size, and colour.                                                                           |
+| **BG Remove** | Remove backgrounds via colour/flood-fill (ImageMagick) or AI (rembg).                                                                                           |
+| **Compress**  | Reduce file size to JPEG, WebP, or AVIF with a quality slider and an optional hard file-size cap (KB). Binary-searches the optimal quality level automatically. |
 
 All panels support **batch processing** with a drag-and-drop file queue and a live job-progress list.
 
 ### AI Background Removal — rembg models
 
-| Group | Model | Size | Best for |
-|---|---|---|---|
-| BiRefNet · MIT | `birefnet-general` ⭐ | ~350 MB | General subjects |
-| BiRefNet · MIT | `birefnet-general-lite` | ~100 MB | Speed / light weight |
-| BiRefNet · MIT | `birefnet-portrait` | ~350 MB | People & selfies |
-| BiRefNet · MIT | `birefnet-dis` | ~350 MB | Product shots |
-| BiRefNet · MIT | `birefnet-hrsod` | ~350 MB | High-resolution subjects |
-| U2Net · Legacy | `u2net` | ~170 MB | Classic all-around |
-| U2Net · Legacy | `u2net_human_seg` | ~170 MB | Portraits |
-| U2Net · Legacy | `isnet-general-use` | ~170 MB | High edge detail |
-| U2Net · Legacy | `silueta` | ~45 MB | Simple objects, fastest |
+| Group          | Model                   | Size    | Best for                 |
+| -------------- | ----------------------- | ------- | ------------------------ |
+| BiRefNet · MIT | `birefnet-general` ⭐    | ~350 MB | General subjects         |
+| BiRefNet · MIT | `birefnet-general-lite` | ~100 MB | Speed / light weight     |
+| BiRefNet · MIT | `birefnet-portrait`     | ~350 MB | People & selfies         |
+| BiRefNet · MIT | `birefnet-dis`          | ~350 MB | Product shots            |
+| BiRefNet · MIT | `birefnet-hrsod`        | ~350 MB | High-resolution subjects |
+| U2Net · Legacy | `u2net`                 | ~170 MB | Classic all-around       |
+| U2Net · Legacy | `u2net_human_seg`       | ~170 MB | Portraits                |
+| U2Net · Legacy | `isnet-general-use`     | ~170 MB | High edge detail         |
+| U2Net · Legacy | `silueta`               | ~45 MB  | Simple objects, fastest  |
 
 Models are downloaded automatically by rembg on first use and cached in `%USERPROFILE%\.u2net`.
 
@@ -33,16 +34,16 @@ Models are downloaded automatically by rembg on first use and cached in `%USERPR
 
 ## Tech Stack
 
-| Layer | Library | Version |
-|---|---|---|
-| App shell | Electron | 33 |
-| Build/dev server | electron-vite | 3 |
-| UI framework | React | 18 |
-| Language | TypeScript | 5.7 |
-| Styling | Tailwind CSS | 3.4 |
-| Image processing | ImageMagick 7 (bundled) | 7.1.2 |
-| AI bg removal | rembg + ONNX Runtime (bundled) | 2.0 |
-| Installer | electron-builder / NSIS | 25 |
+| Layer            | Library                        | Version |
+| ---------------- | ------------------------------ | ------- |
+| App shell        | Electron                       | 33      |
+| Build/dev server | electron-vite                  | 3       |
+| UI framework     | React                          | 18      |
+| Language         | TypeScript                     | 5.7     |
+| Styling          | Tailwind CSS                   | 3.4     |
+| Image processing | ImageMagick 7 (bundled)        | 7.1.2   |
+| AI bg removal    | rembg + ONNX Runtime (bundled) | 2.0     |
+| Installer        | electron-builder / NSIS        | 25      |
 
 ---
 
@@ -64,6 +65,7 @@ magick-gui/
 │   │           ├── CropPanel.tsx
 │   │           ├── WatermarkPanel.tsx
 │   │           ├── BgRemovePanel.tsx
+│   │           ├── CompressPanel.tsx
 │   │           ├── Sidebar.tsx
 │   │           ├── FileDropZone.tsx
 │   │           ├── JobList.tsx
@@ -123,7 +125,7 @@ This PowerShell script:
 1. Downloads the latest **ImageMagick 7 portable Q16 x64** `.7z` from imagemagick.org and extracts it to `resources/bin/magick/`.
 2. Creates an isolated **Python 3.11** virtual environment, installs `rembg[cli,cpu]` and `PyInstaller`, then compiles `rembg.exe` (~127 MB) into `resources/bin/rembg/`.
 
-> **Python requirement:** Python **3.10, 3.11, or 3.12** must be installed. Python 3.14+ is not supported because onnxruntime's PyInstaller hooks require an older ABI. Install Python 3.11 via `winget install Python.Python.3.11`.
+> **Python requirement:** Python **3.10 or later** must be installed. Install via `winget install Python.Python.3.12` or from [python.org](https://www.python.org/downloads/).
 
 ### Step 2 — Build the installer
 
@@ -145,21 +147,21 @@ Runs `prepare-resources` + `build` + `package` in sequence.
 
 ## npm Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start dev server with HMR |
-| `npm run build` | Compile renderer + main (production) |
-| `npm run preview` | Preview the production build |
-| `npm run lint` | TypeScript type-check (`tsc --noEmit`) |
-| `npm run prepare-resources` | Download ImageMagick + build rembg.exe |
-| `npm run package` | Build Electron app + produce NSIS installer |
-| `npm run package:full` | prepare-resources + package in one step |
+| Script                      | Description                                 |
+| --------------------------- | ------------------------------------------- |
+| `npm run dev`               | Start dev server with HMR                   |
+| `npm run build`             | Compile renderer + main (production)        |
+| `npm run preview`           | Preview the production build                |
+| `npm run lint`              | TypeScript type-check (`tsc --noEmit`)      |
+| `npm run prepare-resources` | Download ImageMagick + build rembg.exe      |
+| `npm run package`           | Build Electron app + produce NSIS installer |
+| `npm run package:full`      | prepare-resources + package in one step     |
 
 ---
 
 ## How Binary Paths Work
 
-In **development**, the app resolves `magick` and `rembg` from the system `PATH`.
+In **development**, the app first checks for the downloaded portable binary in `resources/bin/` (available after running `prepare-resources`), then falls back to the system `PATH`.
 
 In **production** (packaged), `src/main/utils/bin-path.ts` resolves each binary from the bundled `resources/` directory:
 
