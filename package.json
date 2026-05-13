@@ -92,7 +92,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "MagickGUI"
+      "shortcutName": "MagickGUI",
+      "artifactName": "MagickGUI-${version}-Setup.exe"
     },
     "compression": "maximum",
     "mac": {
