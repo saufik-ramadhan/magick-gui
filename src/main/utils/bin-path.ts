@@ -11,23 +11,31 @@ import { existsSync } from 'fs'
  *   resources/bin/rembg/rembg.exe     ← rembg compiled by PyInstaller
  */
 export function resolveBin(name: 'magick' | 'rembg'): string {
-  if (!app.isPackaged) {
-    // In dev, assume tool is on system PATH
-    return name
-  }
+  // In dev, check if the binary already exists in resources/bin (after
+  // running prepare-resources) before falling back to system PATH.
+  const projectRoot = app.isPackaged
+    ? null
+    : join(__dirname, '..', '..') // out/main → out → project root
 
   const candidates: string[] = []
 
-  if (process.platform === 'win32') {
+  if (app.isPackaged) {
+    if (process.platform === 'win32') {
+      candidates.push(
+        join(process.resourcesPath, 'bin', name, `${name}.exe`),
+        join(process.resourcesPath, 'bin', `${name}.exe`)
+      )
+    } else {
+      candidates.push(
+        join(process.resourcesPath, 'bin', name, name),
+        join(process.resourcesPath, 'bin', name)
+      )
+    }
+  } else if (projectRoot) {
+    // Dev: prefer the downloaded portable binary in resources/bin
     candidates.push(
-      join(process.resourcesPath, 'bin', name, `${name}.exe`),
-      // Flat layout fallback
-      join(process.resourcesPath, 'bin', `${name}.exe`)
-    )
-  } else {
-    candidates.push(
-      join(process.resourcesPath, 'bin', name, name),
-      join(process.resourcesPath, 'bin', name)
+      join(projectRoot, 'resources', 'bin', name, `${name}.exe`),
+      join(projectRoot, 'resources', 'bin', name, name)
     )
   }
 
@@ -35,6 +43,6 @@ export function resolveBin(name: 'magick' | 'rembg'): string {
     if (existsSync(candidate)) return candidate
   }
 
-  // Last resort — hope it's on PATH (shows a meaningful error if it isn't)
+  // Last resort — hope it's on system PATH (shows a meaningful error if not)
   return name
 }

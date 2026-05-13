@@ -3,11 +3,12 @@ import ConvertPanel from './components/ConvertPanel'
 import CropPanel from './components/CropPanel'
 import WatermarkPanel from './components/WatermarkPanel'
 import BgRemovePanel from './components/BgRemovePanel'
+import CompressPanel from './components/CompressPanel'
 import Sidebar from './components/Sidebar'
 import StatusBar from './components/StatusBar'
 import type { MagickCheckResult } from '../../../types/ipc'
 
-type Tab = 'convert' | 'crop' | 'watermark' | 'bgremove'
+type Tab = 'convert' | 'crop' | 'watermark' | 'bgremove' | 'compress'
 
 export default function App(): JSX.Element {
   const [activeTab, setActiveTab] = useState<Tab>('convert')
@@ -29,6 +30,7 @@ export default function App(): JSX.Element {
           {activeTab === 'crop' && <CropPanel />}
           {activeTab === 'watermark' && <WatermarkPanel />}
           {activeTab === 'bgremove' && <BgRemovePanel />}
+          {activeTab === 'compress' && <CompressPanel />}
         </main>
       </div>
 

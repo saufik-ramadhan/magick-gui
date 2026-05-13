@@ -43,16 +43,19 @@ if (Test-Path $MAGICK_EXE) {
 } else {
     Write-Step "Discovering latest ImageMagick 7 portable x64 Q16 download URL"
 
-    # Dynamically find the latest portable .7z from the official download page
+    # Query the GitHub releases API to find the latest portable Q16-HDRI x64 .7z
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $downloadPage = Invoke-WebRequest -Uri "https://imagemagick.org/script/download.php" -UseBasicParsing
-    $pattern = 'ImageMagick-[\d.]+-\d+-portable-Q16-x64\.7z'
-    $fileName = ([regex]::Matches($downloadPage.Content, $pattern) | Select-Object -ExpandProperty Value | Sort-Object -Descending | Select-Object -First 1)
-    if (-not $fileName) {
-        Write-Fail "Could not find portable Q16 x64 .7z on the download page. Check https://imagemagick.org/script/download.php#windows"
+    $apiUrl = "https://api.github.com/repos/ImageMagick/ImageMagick/releases/latest"
+    $headers = @{ 'User-Agent' = 'magick-gui-prepare-resources' }
+    $release = Invoke-RestMethod -Uri $apiUrl -Headers $headers
+    $asset = $release.assets | Where-Object { $_.name -match 'portable-Q16-HDRI-x64\.7z$' } | Select-Object -First 1
+    if (-not $asset) {
+        Write-Fail "Could not find a portable-Q16-HDRI-x64.7z asset in the latest ImageMagick GitHub release."
+        Write-Fail "Check: https://github.com/ImageMagick/ImageMagick/releases/latest"
         exit 1
     }
-    $IM_URL = "https://imagemagick.org/archive/binaries/$fileName"
+    $fileName = $asset.name
+    $IM_URL   = $asset.browser_download_url
     Write-OK "Found: $fileName"
 
     $ARCHIVE_PATH = Join-Path $env:TEMP "ImageMagick-portable.7z"
@@ -117,18 +120,20 @@ if (Test-Path $REMBG_EXE) {
     # We need exactly 3.11 or 3.12 (stable ML support).
 
     $PYTHON_BUILD = $null
-    $PREFERRED_VERSIONS = @('3.11', '3.12', '3.10')
+    $PREFERRED_VERSIONS = @('3.12', '3.13', '3.14', '3.11', '3.10')
 
     # Try the Windows Python Launcher (py.exe) first
     $pyLauncher = Get-Command "py.exe" -ErrorAction SilentlyContinue
     if ($pyLauncher) {
         foreach ($ver in $PREFERRED_VERSIONS) {
-            $test = & py.exe "-$ver" -c "import sys; print(sys.version)" 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                $PYTHON_BUILD = "py.exe -$ver"
-                Write-OK "Found Python $ver via py launcher"
-                break
-            }
+            try {
+                $test = & py.exe "-$ver" -c "import sys; print(sys.version)" 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    $PYTHON_BUILD = "py.exe -$ver"
+                    Write-OK "Found Python $ver via py launcher"
+                    break
+                }
+            } catch { <# version not installed, try next #> }
         }
     }
 
@@ -136,21 +141,43 @@ if (Test-Path $REMBG_EXE) {
     if (-not $PYTHON_BUILD) {
         foreach ($ver in $PREFERRED_VERSIONS) {
             $exe = "python$ver"
-            $test = & $exe -c "import sys; print(sys.version)" 2>&1
-            if ($LASTEXITCODE -eq 0) {
-                $PYTHON_BUILD = $exe
-                Write-OK "Found $exe"
-                break
-            }
+            try {
+                $test = & $exe -c "import sys; print(sys.version)" 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    $PYTHON_BUILD = $exe
+                    Write-OK "Found $exe"
+                    break
+                }
+            } catch { <# not found, try next #> }
+        }
+    }
+
+    # Fall back to plain python / python3 — accept 3.10+
+    if (-not $PYTHON_BUILD) {
+        foreach ($exe in @('python', 'python3')) {
+            try {
+                $verOut = & $exe -c "import sys; print(sys.version_info.major, sys.version_info.minor)" 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    $parts = $verOut.Trim() -split ' '
+                    $major = [int]$parts[0]
+                    $minor = [int]$parts[1]
+                    if ($major -eq 3 -and $minor -ge 10) {
+                        $PYTHON_BUILD = $exe
+                        Write-OK "Found $exe ($major.$minor)"
+                        break
+                    } elseif ($major -lt 3 -or ($major -eq 3 -and $minor -lt 10)) {
+                        Write-Warn "$exe is Python $major.$minor — too old (3.10+ required), skipping"
+                    }
+                }
+            } catch { <# not found, try next #> }
         }
     }
 
     if (-not $PYTHON_BUILD) {
         Write-Fail @"
-Python 3.11 or 3.12 is required to build rembg.exe.
-Python 3.14+ is NOT supported due to missing onnxruntime/PyInstaller hooks.
+No suitable Python 3.10+ runtime found on PATH.
 
-Install Python 3.11 from: https://www.python.org/downloads/release/python-3110/
+Install Python 3.12 from: https://www.python.org/downloads/
 Make sure to check 'Add to PATH' during installation.
 Then re-run: npm run prepare-resources
 "@
@@ -179,8 +206,8 @@ Then re-run: npm run prepare-resources
     $VENV_PIP = Join-Path $VENV_DIR "Scripts\pip.exe"
 
     Write-Host "    Installing rembg[cli,cpu] and PyInstaller into venv..."
-    & $VENV_PIP install --quiet --upgrade pip
-    & $VENV_PIP install --quiet "rembg[cli,cpu]" pyinstaller
+    & $VENV_PY -m pip install --quiet --upgrade pip
+    & $VENV_PY -m pip install --quiet "rembg[cli,cpu]" pyinstaller
     if ($LASTEXITCODE -ne 0) {
         Write-Fail "pip install failed inside venv."
         exit 1
@@ -204,6 +231,13 @@ Then re-run: npm run prepare-resources
         "--copy-metadata", "pymatting",
         "--copy-metadata", "huggingface_hub",
         "--copy-metadata", "onnxruntime",
+        # Exclude heavy packages not needed by the rembg CLI at runtime
+        "--exclude-module", "numba",
+        "--exclude-module", "llvmlite",
+        "--exclude-module", "gradio",
+        "--exclude-module", "IPython",
+        "--exclude-module", "matplotlib",
+        "--exclude-module", "pytest",
         "--noconfirm",
         $ENTRY_SCRIPT
     )
@@ -253,8 +287,9 @@ if (Test-Path $WIN_CODE_SIGN_CACHE) {
         Write-Host "    Downloading winCodeSign-2.6.0.7z ..."
         Invoke-WebRequest -Uri $WCS_URL -OutFile $WCS_ARCHIVE -UseBasicParsing
         New-Item -ItemType Directory -Force -Path $WIN_CODE_SIGN_CACHE | Out-Null
-        # Use -snl flag to not create symlinks - ignores the macOS dylib symlinks
-        & $7ZA_EB x $WCS_ARCHIVE "-o$WIN_CODE_SIGN_CACHE" -snl -y | Out-Null
+        # Use -snl flag to skip symlinks — macOS dylib symlinks cause harmless
+        # errors on Windows; redirect stderr to suppress them.
+        & $7ZA_EB x $WCS_ARCHIVE "-o$WIN_CODE_SIGN_CACHE" -snl -y 2>$null | Out-Null
         Remove-Item $WCS_ARCHIVE -Force -ErrorAction SilentlyContinue
         Write-OK "winCodeSign cache populated at $WIN_CODE_SIGN_CACHE"
     }
@@ -275,3 +310,5 @@ Get-ChildItem $BIN_DIR -Recurse -File | ForEach-Object {
     $size = [math]::Round($_.Length / 1MB, 1)
     Write-Host ("  {0,-60} {1,6} MB" -f $rel, $size)
 }
+
+exit 0

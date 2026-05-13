@@ -5,6 +5,7 @@ import type {
   WatermarkRequest,
   BgRemoveColorRequest,
   BgRemoveAiRequest,
+  CompressRequest,
   JobProgress,
   MagickCheckResult,
   RembgCheckResult
@@ -20,6 +21,8 @@ const magickAPI = {
   cropImages: (req: CropRequest): Promise<void> => ipcRenderer.invoke('magick:crop', req),
 
   watermarkImages: (req: WatermarkRequest): Promise<void> => ipcRenderer.invoke('magick:watermark', req),
+
+  compressImages: (req: CompressRequest): Promise<void> => ipcRenderer.invoke('magick:compress', req),
 
   // Background removal
   removeBgColor: (req: BgRemoveColorRequest): Promise<void> => ipcRenderer.invoke('magick:removebg-color', req),

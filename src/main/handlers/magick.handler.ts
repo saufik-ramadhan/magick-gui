@@ -1,7 +1,7 @@
 import { ipcMain, BrowserWindow } from 'electron'
 import { spawn } from 'child_process'
 import { basename, extname, join, dirname } from 'path'
-import { existsSync, mkdirSync } from 'fs'
+import { existsSync, mkdirSync, statSync } from 'fs'
 import { resolveBin } from '../utils/bin-path'
 import type {
   ConvertJob,
@@ -11,7 +11,8 @@ import type {
   ConvertRequest,
   CropRequest,
   WatermarkRequest,
-  BgRemoveColorRequest
+  BgRemoveColorRequest,
+  CompressRequest
 } from '../../types/ipc'
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
@@ -373,4 +374,149 @@ export function registerMagickHandlers(mainWindow: BrowserWindow): void {
       mainWindow.webContents.send('magick:progress', done)
     }
   })
+
+  // ── Compress Images ────────────────────────────────────────────────────────
+  ipcMain.handle('magick:compress', async (_event, req: CompressRequest): Promise<void> => {
+    const { files, outputFormat, quality, maxSizeKb, outputDir, suffix } = req
+    const total = files.length
+    const tag = suffix || 'compressed'
+
+    for (let i = 0; i < total; i++) {
+      const inputPath = files[i]
+      const nameWithoutExt = basename(inputPath, extname(inputPath))
+      const safeOutputDir = outputDir || dirname(inputPath)
+
+      if (!existsSync(safeOutputDir)) mkdirSync(safeOutputDir, { recursive: true })
+
+      const outputFilename = sanitizeFilename(`${nameWithoutExt}_${tag}.${outputFormat}`)
+      const outputPath = join(safeOutputDir, outputFilename)
+
+      const progress: JobProgress = {
+        id: `compress-${i}`,
+        inputFile: inputPath,
+        outputFile: outputPath,
+        index: i,
+        total,
+        status: 'running',
+        message: `Compressing ${basename(inputPath)}`
+      }
+      mainWindow.webContents.send('magick:progress', progress)
+
+      let result: { stdout: string; stderr: string; code: number }
+
+      if (!maxSizeKb) {
+        // Simple quality pass — no size constraint
+        const args = [inputPath, '-quality', String(quality), '-strip', outputPath]
+        result = await runMagick(args)
+      } else if (outputFormat === 'jpg') {
+        // JPEG: ImageMagick native extent hint (single pass)
+        const args = [
+          inputPath,
+          '-define', `jpeg:extent=${maxSizeKb}kb`,
+          '-quality', String(quality),
+          '-strip',
+          outputPath
+        ]
+        result = await runMagick(args)
+        // Verify the cap was respected (IM may not always honour the hint)
+        if (result.code === 0 && existsSync(outputPath)) {
+          const actualKb = statSync(outputPath).size / 1024
+          if (actualKb > maxSizeKb) {
+            // Fall through to binary search below
+            result = { stdout: '', stderr: '', code: -1 }
+          }
+        }
+        // If native hint failed, fall through to binary search
+        if (result.code !== 0) {
+          const binResult = await binarySearchQuality(inputPath, outputPath, outputFormat, quality, maxSizeKb)
+          result = binResult.magickResult
+          if (!binResult.found) {
+            mainWindow.webContents.send('magick:progress', {
+              ...progress,
+              status: 'error',
+              message: `Cannot reach ${maxSizeKb} KB even at minimum quality`
+            })
+            continue
+          }
+        }
+      } else {
+        // WebP / AVIF: binary search quality
+        const binResult = await binarySearchQuality(inputPath, outputPath, outputFormat, quality, maxSizeKb)
+        result = binResult.magickResult
+        if (!binResult.found) {
+          mainWindow.webContents.send('magick:progress', {
+            ...progress,
+            status: 'error',
+            message: `Cannot reach ${maxSizeKb} KB even at minimum quality`
+          })
+          continue
+        }
+      }
+
+      let message: string
+      if (result.code === 0) {
+        const actualKb = existsSync(outputPath)
+          ? (statSync(outputPath).size / 1024).toFixed(1)
+          : '?'
+        message = `Done: ${outputFilename} (${actualKb} KB)`
+      } else {
+        message = `Failed: ${result.stderr.trim() || 'unknown error'}`
+      }
+
+      mainWindow.webContents.send('magick:progress', {
+        ...progress,
+        status: result.code === 0 ? 'done' : 'error',
+        message
+      })
+    }
+  })
+}
+
+// ─── Binary search helper for size-capped WebP / AVIF / fallback JPEG ────────
+
+async function binarySearchQuality(
+  inputPath: string,
+  outputPath: string,
+  outputFormat: string,
+  maxQuality: number,
+  maxSizeKb: number
+): Promise<{ found: boolean; magickResult: { stdout: string; stderr: string; code: number } }> {
+  let lo = 1
+  let hi = maxQuality
+  let bestResult: { stdout: string; stderr: string; code: number } = { stdout: '', stderr: '', code: 1 }
+  let found = false
+
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2)
+    const args = [inputPath, '-quality', String(mid), '-strip', outputPath]
+    const res = await runMagick(args)
+
+    if (res.code !== 0) {
+      // magick error — abort
+      return { found: false, magickResult: res }
+    }
+
+    const sizeKb = existsSync(outputPath) ? statSync(outputPath).size / 1024 : Infinity
+
+    if (sizeKb <= maxSizeKb) {
+      // This quality fits — try higher
+      found = true
+      bestResult = res
+      lo = mid + 1
+    } else {
+      // Too large — go lower
+      hi = mid - 1
+    }
+  }
+
+  if (!found) {
+    // Even quality=1 exceeds limit
+    return { found: false, magickResult: bestResult }
+  }
+
+  // Re-run with the best quality found to ensure output file is correct
+  const bestQuality = lo - 1
+  const finalArgs = [inputPath, '-quality', String(bestQuality), '-strip', outputPath]
+  const finalResult = await runMagick(finalArgs)
+  return { found: true, magickResult: finalResult }
 }

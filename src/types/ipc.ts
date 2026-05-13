@@ -105,3 +105,16 @@ export interface RembgCheckResult {
   available: boolean
   version: string | null
 }
+
+// ─── Compression ──────────────────────────────────────────────────────────────
+
+export type CompressFormat = 'jpg' | 'webp' | 'avif'
+
+export interface CompressRequest {
+  files: string[]
+  outputFormat: CompressFormat
+  quality: number        // 1–100
+  maxSizeKb?: number     // optional hard cap in KB
+  outputDir: string | null
+  suffix?: string        // defaults to "_compressed"
+}
