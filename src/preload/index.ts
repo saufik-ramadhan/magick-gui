@@ -41,7 +41,11 @@ const magickAPI = {
   openFiles: (options?: Electron.OpenDialogOptions): Promise<string[]> =>
     ipcRenderer.invoke('dialog:openFiles', options),
 
-  openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:openDirectory')
+  openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:openDirectory'),
+
+  // Read a local image file as a base64 data URL for display in the renderer
+  readFileAsDataUrl: (filePath: string): Promise<string | null> =>
+    ipcRenderer.invoke('file:readAsDataUrl', filePath)
 }
 
 contextBridge.exposeInMainWorld('magickAPI', magickAPI)

@@ -3,6 +3,7 @@ import { clsx } from 'clsx'
 import FileDropZone from './FileDropZone'
 import JobList from './JobList'
 import OutputDirPicker from './OutputDirPicker'
+import BeforeAfterPreview from './BeforeAfterPreview'
 import type { BgRemoveMode, RembgCheckResult, JobProgress } from '../../../../types/ipc'
 
 // ─── Rembg model options ───────────────────────────────────────────────────────
@@ -168,6 +169,7 @@ export default function BgRemovePanel(): JSX.Element {
   // Jobs
   const [jobs, setJobs] = useState<JobProgress[]>([])
   const [running, setRunning] = useState(false)
+  const [previewJob, setPreviewJob] = useState<JobProgress | null>(null)
 
   // Check rembg when switching to AI mode
   useEffect(() => {
@@ -583,7 +585,11 @@ export default function BgRemovePanel(): JSX.Element {
         )}
       </div>
 
-      <JobList jobs={jobs} onClear={() => setJobs([])} />
+      <JobList jobs={jobs} onClear={() => setJobs([])} onPreview={setPreviewJob} />
+
+      {previewJob && (
+        <BeforeAfterPreview job={previewJob} onClose={() => setPreviewJob(null)} />
+      )}
     </div>
   )
 }

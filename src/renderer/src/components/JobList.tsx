@@ -4,6 +4,7 @@ import type { JobProgress } from '../../../../types/ipc'
 interface JobListProps {
   jobs: JobProgress[]
   onClear: () => void
+  onPreview?: (job: JobProgress) => void
 }
 
 const STATUS_CONFIG = {
@@ -13,7 +14,7 @@ const STATUS_CONFIG = {
   error: { color: 'text-red-400', dot: 'bg-red-400', label: 'Error' }
 }
 
-export default function JobList({ jobs, onClear }: JobListProps): JSX.Element | null {
+export default function JobList({ jobs, onClear, onPreview }: JobListProps): JSX.Element | null {
   if (jobs.length === 0) return null
 
   const doneCount = jobs.filter((j) => j.status === 'done').length
@@ -67,6 +68,19 @@ export default function JobList({ jobs, onClear }: JobListProps): JSX.Element | 
                   {job.inputFile.split(/[\\/]/).pop()}
                 </p>
               </div>
+
+              {onPreview && job.status === 'done' && (
+                <button
+                  onClick={() => onPreview(job)}
+                  title="Preview before / after"
+                  className="shrink-0 w-6 h-6 flex items-center justify-center rounded text-white/30 hover:text-accent hover:bg-accent/10 transition-colors"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z" strokeLinejoin="round" />
+                    <circle cx="8" cy="8" r="2" />
+                  </svg>
+                </button>
+              )}
 
               <span
                 className={clsx(

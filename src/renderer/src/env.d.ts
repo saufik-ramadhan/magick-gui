@@ -11,6 +11,7 @@ interface MagickAPI {
   onProgress(callback: (progress: JobProgress) => void): () => void
   openFiles(options?: { title?: string }): Promise<string[]>
   openDirectory(): Promise<string | null>
+  readFileAsDataUrl(filePath: string): Promise<string | null>
 }
 
 declare global {
