@@ -13,9 +13,9 @@ import { existsSync } from 'fs'
 export function resolveBin(name: 'magick' | 'rembg'): string {
   // In dev, check if the binary already exists in resources/bin (after
   // running prepare-resources) before falling back to system PATH.
-  const projectRoot = app.isPackaged
-    ? null
-    : join(__dirname, '..', '..') // out/main → out → project root
+  // app.getAppPath() reliably returns the project root in dev mode (where
+  // package.json lives) without depending on __dirname navigation.
+  const projectRoot = app.isPackaged ? null : app.getAppPath()
 
   const candidates: string[] = []
 

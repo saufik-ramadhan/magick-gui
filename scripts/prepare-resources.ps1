@@ -231,13 +231,6 @@ Then re-run: npm run prepare-resources
         "--copy-metadata", "pymatting",
         "--copy-metadata", "huggingface_hub",
         "--copy-metadata", "onnxruntime",
-        # Exclude heavy packages not needed by the rembg CLI at runtime
-        "--exclude-module", "numba",
-        "--exclude-module", "llvmlite",
-        "--exclude-module", "gradio",
-        "--exclude-module", "IPython",
-        "--exclude-module", "matplotlib",
-        "--exclude-module", "pytest",
         "--noconfirm",
         $ENTRY_SCRIPT
     )

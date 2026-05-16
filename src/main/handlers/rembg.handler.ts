@@ -28,17 +28,19 @@ export function registerRembgHandlers(mainWindow: BrowserWindow): void {
   ipcMain.handle('rembg:check', async (): Promise<RembgCheckResult> => {
     const binPath = resolveBin('rembg')
 
-    // When packaged, the binary was bundled intentionally — just verify it exists.
-    // Running the PyInstaller-compiled exe for --version is unreliable: it
-    // self-extracts to %TEMP% on first run which can hang or time out.
+    // If a local binary exists (packaged bundle or dev resources/bin), verify
+    // by existence only — running the PyInstaller exe for --version is
+    // unreliable (self-extracts on first run, and the entry script only
+    // supports the 'i' subcommand so --version exits non-zero anyway).
+    if (existsSync(binPath)) {
+      return { available: true, version: app.isPackaged ? 'bundled' : 'local' }
+    }
+
     if (app.isPackaged) {
-      if (existsSync(binPath)) {
-        return { available: true, version: 'bundled' }
-      }
       return { available: false, version: null }
     }
 
-    // In dev: try running rembg --version (system PATH)
+    // Dev fallback: try running rembg --version from system PATH
     const result = await runRembg(['--version'])
     if (result.code === 0) {
       const version = result.stdout.trim() || result.stderr.trim() || 'unknown'
