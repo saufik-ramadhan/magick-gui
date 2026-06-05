@@ -11,7 +11,7 @@
     "package": "powershell -ExecutionPolicy Bypass -Command \"$env:CSC_IDENTITY_AUTO_DISCOVERY='false'; npx electron-vite build; if ($LASTEXITCODE -ne 0) { exit 1 }; npx electron-builder; exit $LASTEXITCODE\"",
     "package:full": "powershell -ExecutionPolicy Bypass -Command \"$env:CSC_IDENTITY_AUTO_DISCOVERY='false'; & scripts/prepare-resources.ps1; if ($LASTEXITCODE -ne 0) { exit 1 }; npx electron-vite build; if ($LASTEXITCODE -ne 0) { exit 1 }; npx electron-builder; exit $LASTEXITCODE\"",
     "lint": "tsc --noEmit",
-    "version": "node scripts/update-version.js",
+    "version": "node scripts/update-version.js && git add docs/index.html",
     "release:patch": "npm version patch && git push --follow-tags",
     "release:minor": "npm version minor && git push --follow-tags",
     "release:major": "npm version major && git push --follow-tags"
