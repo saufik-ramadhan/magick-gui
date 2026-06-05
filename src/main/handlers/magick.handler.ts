@@ -340,14 +340,42 @@ export function registerMagickHandlers(mainWindow: BrowserWindow): void {
       if (floodfill) {
         // Flood-fill from all 4 corners — better for photos with complex edges
         // but solid-ish background color
+        // First get image dimensions to floodfill from actual corner coordinates
+        const identifyResult = await runMagick(['identify', '-format', '%w %h', inputPath])
+
+        if (identifyResult.code !== 0) {
+          mainWindow.webContents.send('magick:progress', {
+            ...progress,
+            status: 'error',
+            message: `Cannot read image: ${identifyResult.stderr.trim()}`
+          })
+          continue
+        }
+
+        const [wStr, hStr] = identifyResult.stdout.trim().split(' ')
+        const imgW = parseInt(wStr, 10)
+        const imgH = parseInt(hStr, 10)
+
+        if (isNaN(imgW) || isNaN(imgH)) {
+          mainWindow.webContents.send('magick:progress', {
+            ...progress,
+            status: 'error',
+            message: 'Could not parse image dimensions'
+          })
+          continue
+        }
+
+        // Use (0, 0), (0, H-1), (W-1, 0), (W-1, H-1) as start points
+        // -fill none makes the floodfill replace matched pixels with transparent
         args = [
           inputPath,
           '-alpha', 'set',
           '-fuzz', `${fuzz}%`,
+          '-fill', 'none',
           '-draw', `color 0,0 floodfill`,
-          '-draw', `color 0,99999 floodfill`,
-          '-draw', `color 99999,0 floodfill`,
-          '-draw', `color 99999,99999 floodfill`,
+          '-draw', `color 0,${imgH - 1} floodfill`,
+          '-draw', `color ${imgW - 1},0 floodfill`,
+          '-draw', `color ${imgW - 1},${imgH - 1} floodfill`,
           outputPath
         ]
       } else {
